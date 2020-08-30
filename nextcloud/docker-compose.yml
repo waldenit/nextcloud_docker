@@ -17,17 +17,29 @@ services:
       - MYSQL_USER=nextcloud
       - MYSQL_INITDB_SKIP_TZINFO=1 
 
+  nextcloud-redis:
+    image: redis:alpine
+    container_name: nextcloud-redis
+    hostname: nextcloud-redis
+    networks:
+        - default
+    restart: always
+    command: redis-server --requirepass linux1478n3M=
+
   nextcloud-app:
     image: nextcloud
     container_name: nextcloud-app
     restart: always
-    depends_on: 
+    depends_on:
       - nextcloud-db
+      - nextcloud-redis
     volumes:
       - /opt/container/nextcloud/app:/var/www/html
+    environment:
+        REDIS_HOST: nextcloud-redis
+        REDIS_HOST_PASSWORD: linux1478n3M=
     links:
       - nextcloud-db
-
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.nextcloud-app.entrypoints=http"
